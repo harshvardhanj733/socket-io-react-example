@@ -9,12 +9,12 @@ function App() {
   const [room, setRoom] = useState("");
 
   // Messages States
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [messageReceived, setMessageReceived] = useState([]);
 
   //Messenger State
-  const [messengerId, setMessengerId] = useState('');
+  const [messengerId, setMessengerId] = useState("");
 
   const joinRoom = () => {
     if (room !== "") {
@@ -24,7 +24,7 @@ function App() {
 
   const sendMessage = () => {
     socket.emit("send_message", { message, room });
-    setMessages(existingMessages => {
+    setMessages((existingMessages) => {
       const updatedMessages = [...existingMessages, message];
       console.log(updatedMessages); // Add this line for debugging
       return updatedMessages;
@@ -33,7 +33,7 @@ function App() {
 
   useEffect(() => {
     socket.on("receive_message", (messageDetails) => {
-      setMessageReceived(existingMessages => {
+      setMessageReceived((existingMessages) => {
         const updatedMessages = [...existingMessages, messageDetails.message];
         console.log(updatedMessages); // Add this line for debugging
         return updatedMessages;
@@ -41,44 +41,67 @@ function App() {
       setMessengerId(messageDetails.user);
     });
 
-    socket.on("newJoinee", (id)=>{
-      alert(`New User Joined: ${id}`)
-    })
-
+    socket.on("newJoinee", (id) => {
+      alert(`New User Joined: ${id}`);
+    });
   }, [socket]);
-  
-
+  const handleEnter = (e) => {
+    if (e.key === "Enter") {
+      sendMessage(e);
+    }
+  };
   return (
-    <div className="App">
-      <input
-        placeholder="Room Number..."
-        onChange={(event) => {
-          setRoom(event.target.value);
-        }}
-      />
-      <button onClick={joinRoom}> Join Room</button>
-      <input
-        placeholder="Message..."
-        onChange={(event) => {
-          setMessage(event.target.value);
-        }}
-      />
-      <button onClick={sendMessage}> Send Message</button>
-      <h1> Message:</h1>
-      {messages.map((message) => {
-        return(<>
-          <h2 style={{color:"red"}}>{message}</h2>
-          <br />
-        </>)
-      })}
-      {messageReceived.map((message) => {
-        return(<>
-          <h2>{message}</h2>
-          <br />
-        </>)
-      })}
+    <div className="flex flex-col justify-start p-4 w-full items-center">
+      <div>
+        {" "}
+        <input
+          placeholder="Room Number..."
+          onChange={(event) => {
+            setRoom(event.target.value);
+          }}
+        />
+        <button className="bg-red-100 px-3 rounded-md py-1" onClick={joinRoom}>
+          {" "}
+          Join Room
+        </button>
+      </div>
+      <div className="flex flex-col justify-around w-screen mt-4 bg-cyan-100">
+        {messages.map((message) => {
+          return (
+            <>
+              <h2 className="ml-12" style={{ color: "red" }}>
+                {message}
+              </h2>
+            </>
+          );
+        })}
+        {messageReceived.map((message) => {
+          return (
+            <>
+              <h2>{message}</h2>
+            </>
+          );
+        })}
+      </div>
       {/* <h2>{messageReceived}</h2> */}
-      <p>{messengerId}</p>
+      {/* <p>{messengerId}</p> */}
+      <div className="w-screen px-12 border border-t-red-800 py-4 flex justify-between">
+        <input
+          className="w-full mr-4 border-none outline-none"
+          placeholder="Message..."
+          onChange={(event) => {
+            setMessage(event.target.value);
+          }}
+          onKeyDown={handleEnter}
+        />
+        <button
+          className="bg-yellow-100 pl-8 w-32 rounded-md py-3 flex"
+          onClick={sendMessage}
+        >
+          {" "}
+          Send 📩
+        </button>
+      </div>
     </div>
   );
 }
