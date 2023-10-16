@@ -9,8 +9,12 @@ function App() {
   const [room, setRoom] = useState("");
 
   // Messages States
-  const [message, setMessage] = useState("");
-  const [messageReceived, setMessageReceived] = useState("");
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [messageReceived, setMessageReceived] = useState([]);
+
+  //Messenger State
+  const [messengerId, setMessengerId] = useState('');
 
   const joinRoom = () => {
     if (room !== "") {
@@ -20,13 +24,30 @@ function App() {
 
   const sendMessage = () => {
     socket.emit("send_message", { message, room });
+    setMessages(existingMessages => {
+      const updatedMessages = [...existingMessages, message];
+      console.log(updatedMessages); // Add this line for debugging
+      return updatedMessages;
+    });
   };
 
   useEffect(() => {
-    socket.on("receive_message", (data) => {
-      setMessageReceived(data.message);
+    socket.on("receive_message", (messageDetails) => {
+      setMessageReceived(existingMessages => {
+        const updatedMessages = [...existingMessages, messageDetails.message];
+        console.log(updatedMessages); // Add this line for debugging
+        return updatedMessages;
+      });
+      setMessengerId(messageDetails.user);
     });
+
+    socket.on("newJoinee", (id)=>{
+      alert(`New User Joined: ${id}`)
+    })
+
   }, [socket]);
+  
+
   return (
     <div className="App">
       <input
@@ -44,7 +65,20 @@ function App() {
       />
       <button onClick={sendMessage}> Send Message</button>
       <h1> Message:</h1>
-      {messageReceived}
+      {messages.map((message) => {
+        return(<>
+          <h2 style={{color:"red"}}>{message}</h2>
+          <br />
+        </>)
+      })}
+      {messageReceived.map((message) => {
+        return(<>
+          <h2>{message}</h2>
+          <br />
+        </>)
+      })}
+      {/* <h2>{messageReceived}</h2> */}
+      <p>{messengerId}</p>
     </div>
   );
 }

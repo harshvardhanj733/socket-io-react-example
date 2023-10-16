@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
 const http = require("http");
+const server = http.createServer(app);
 const { Server } = require("socket.io");
 const cors = require("cors");
 
 app.use(cors());
 
-const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
@@ -16,14 +16,22 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log(`User Connected: ${socket.id}`);
 
-  socket.on("join_room", (data) => {
-    socket.join(data);
+  socket.on("join_room", (room) => {
+    console.log(`${socket.id} joined room no. ${room}`);
+    socket.join(room);
+    socket.to(room).emit('newJoinee', socket.id)
   });
 
-  socket.on("send_message", (data) => {
-    socket.to(data.room).emit("receive_message", data);
+  socket.on("send_message", (messageDetails) => {
+    const {room, message} = messageDetails
+    console.log(messageDetails)
+    const newMessageDetails = {
+      room, 
+      message,
+      user: socket.id
+    }
+    socket.to(messageDetails.room).emit("receive_message", newMessageDetails);
   });
 });
 
