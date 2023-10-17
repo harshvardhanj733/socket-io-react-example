@@ -9,12 +9,19 @@ function App() {
   const [room, setRoom] = useState("");
 
   // Messages States
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [messageReceived, setMessageReceived] = useState([]);
-
+  
   //Messenger State
+  const[myId, setMyId] = useState();
   const [messengerId, setMessengerId] = useState("");
+
+  //Message Time
+  const [messageTime, setMessageTime] = useState()
+
+  //Message Details
+  const [messageDeet, setMessageDeet] = useState({});
 
   const joinRoom = () => {
     if (room !== "") {
@@ -23,7 +30,15 @@ function App() {
   };
 
   const sendMessage = () => {
-    socket.emit("send_message", { message, room });
+    setMessengerId(myId);
+    const currentTime = new Date().getTime();
+    setMessageTime(currentTime);
+    setMessageDeet({
+      message,
+      messengerId,
+      messageTime
+    })
+    socket.emit("send_message", { messageDeet, room });
     setMessages((existingMessages) => {
       const updatedMessages = [...existingMessages, message];
       console.log(updatedMessages); // Add this line for debugging
@@ -31,7 +46,19 @@ function App() {
     });
   };
 
+
   useEffect(() => {
+    // Move the socket.on("getId") outside of the joinRoom function
+    socket.on("getId", (id) => {
+      console.log(id);
+      setMyId(id);
+      console.log(myId);
+      alert(id);
+    });
+  }, []);
+
+  useEffect(() => {
+
     socket.on("receive_message", (messageDetails) => {
       setMessageReceived((existingMessages) => {
         const updatedMessages = [...existingMessages, messageDetails.message];
@@ -45,11 +72,19 @@ function App() {
       alert(`New User Joined: ${id}`);
     });
   }, [socket]);
+
   const handleEnter = (e) => {
     if (e.key === "Enter") {
       sendMessage(e);
     }
   };
+
+  const handleEnterRoom = (e) => {
+    if(e.key === "Enter"){
+        joinRoom(e);
+    }
+  }
+
   return (
     <div className="flex flex-col justify-start p-4 w-full items-center">
       <div>
@@ -59,6 +94,7 @@ function App() {
           onChange={(event) => {
             setRoom(event.target.value);
           }}
+          onKeyDown={handleEnterRoom}
         />
         <button className="bg-red-100 px-3 rounded-md py-1" onClick={joinRoom}>
           {" "}
