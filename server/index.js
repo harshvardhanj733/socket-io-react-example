@@ -16,23 +16,17 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  
+  socket.emit('getId', socket.id);
   socket.on("join_room", (room) => {
-    socket.emit('getId', socket.id);
-    console.log(`${socket.id} joined room no. ${room}`);
+    // console.log(`${socket.id} joined room no. ${room}`);
     socket.join(room);
     socket.to(room).emit('newJoinee', socket.id)
   });
 
   socket.on("send_message", (messageDetails) => {
-    const {room, message} = messageDetails
-    console.log(messageDetails)
-    const newMessageDetails = {
-      room, 
-      message,
-      user: socket.id
-    }
-    socket.to(messageDetails.room).emit("receive_message", newMessageDetails);
+    const {room, messageDeet} = messageDetails
+    // console.log(messageDetails)
+    socket.to(messageDetails.room).emit("receive_message", messageDetails);
   });
 });
 
