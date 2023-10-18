@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 const socket = io.connect("http://localhost:3001");
 
 function App() {
+
+  //All Users State In a Room
+  const [participants, setParticipants] = useState([]);
+
+  //Name State
+  const [name, setName] = useState("");
   // Room State
   const [room, setRoom] = useState("");
 
@@ -16,11 +22,17 @@ function App() {
   const [myId, setMyId] = useState("");
 
   const joinRoom = () => {
-    if (room !== "") {
-      socket.emit("join_room", room);
-      alert(`Your Id is: ${myId} and You have joined room ${room}`);
+    if (room !== "" && name != "") {
+      socket.emit("join_room", { room, name });
+      alert(`Your Name is: ${name} ~ ${myId.substring(0, 3)} and You have joined room ${room}`);
     }
   };
+
+  const handleDeletion = () => {
+    console.log("Delete Button Clicked")
+    socket.emit('wannaDisconnect', { room, name })
+    window.location.reload();
+  }
 
   const sendMessage = () => {
     const date = new Date();
@@ -39,7 +51,8 @@ function App() {
 
     let messageDeet = {
       message,
-      messengerId: myId,
+      // messengerId: myId,
+      name: `${name} ~ ${myId.substring(0, 3)}`,
       messageTime: formattedTime,
       sent: true, //You can change this... and line number 59
     };
@@ -57,6 +70,21 @@ function App() {
 
     setMessage("");
   };
+
+    useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Call handleDeletion when the page is about to unload (reload, close, etc.)
+      handleDeletion();
+    };
+
+    // Attach the event listener to the beforeunload event
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   useEffect(() => {
     socket.on("getId", (id) => {
@@ -76,10 +104,22 @@ function App() {
       });
     });
 
-    socket.on("newJoinee", (id) => {
-      alert(`New User Joined: ${id}`);
+    socket.on("newJoinee", ({ name, id }) => {
+      alert(`New User Joined: ${name} ~ ${id.substring(0, 3)}`);
     });
-  }, []);
+
+    socket.on('participantList', (participantList) => {
+      setParticipants(participantList);
+    })
+
+    socket.on('disconnectJoinee', (disconnectObj) => {
+      alert(`User Disconnected: ${disconnectObj.name} ~ ${disconnectObj.id.substring(0, 3)}`);
+      setParticipants(disconnectObj.participantList);
+    })
+
+    socket.on('disconnect');
+
+  }, [socket]);
 
   const handleEnter = (e) => {
     if (e.key === "Enter") {
@@ -92,37 +132,24 @@ function App() {
       joinRoom(e);
     }
   };
-  const [elementHeight, setElementHeight] = useState(0);
-  useEffect(() => {
-    const windowHeight = window.innerHeight;
-    const headerHeight =
-      document.getElementById("HeadRoomElement").offsetHeight;
-    const footerHeight =
-      document.getElementById("FooterSendElement").offsetHeight;
-    const calculatedHeight = windowHeight - headerHeight - footerHeight;
-
-    setElementHeight(calculatedHeight);
-
-    console.log(elementHeight);
-  }, []);
 
   return (
-    <div className="flex flex-col overflow-x-hidden bg-blue-800 justify-start pt-4 w-full items-center">
+    <div className="flex flex-col overflow-x-hidden justify-start w-screen lg:w-1/3 items-center h-screen">
       <div
         id="HeadRoomElement"
-        className="flex justify-between px-16 w-full gap-7 items-center"
+        className="flex justify-between w-full gap-0 items-center h-[10vh] bg-blue-800"
       >
         {" "}
         <p className="font-bold text-white text-xl">pH</p>
         <div className="space-x-4">
           {" "}
           <input
-            className="p-2 outline-none w-28 hidden"
+            className="p-2 outline-none w-28"
             placeholder="Your name"
-            // onChange={(event) => {
-            //   setRoom(event.target.value);
-            // }}
-            // onKeyDown={handleEnterRoom}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            onKeyDown={handleEnterRoom}
           />
           <input
             className="p-2 outline-none w-24"
@@ -142,33 +169,49 @@ function App() {
         </div>
         <button
           className="text-2xl rounded-md hover:bg-red-500 pb-2"
-          onClick={() => {
-            window.location.reload();
-          }}
+          // onClick={() => {
+          //   window.location.reload();
+          // }}
+
+          onClick={handleDeletion}
         >
           {" "}
           ❌
         </button>
       </div>
+
+      <div className="w-full bg-blue-500 h-[5vh] text-white flex">
+        <p>All Members:</p>
+        {participants.map((participant) => {
+          return (
+            <p>
+              {participant.name}~{participant.id.substring(0, 3)}&nbsp;
+            </p>
+          );
+        })}
+      </div>
+
       <div
-        className={`flex flex-col text-gray-500 justify-start w-screen h-[440px] overflow-y-scroll mt-4 bg-cyan-50`}
+        className={`flex flex-col text-gray-500 justify-start w-full h-[70vh] overflow-y-scroll bg-cyan-50`}
       >
         {" "}
+        {/* {participants.map((participant)=>(
+          <p>{participant.name}   {participant.id}</p>
+        ))} */}
         {messages.map((messageDeet) => (
           <div className="flex flex-col px-20 pt-2 gap-3">
             <div
-              className={` flex flex-col ${
-                messageDeet.sent ? "items-end" : "items-start"
-              }`}
+              className={` flex flex-col ${messageDeet.sent ? "items-end" : "items-start"
+                }`}
             >
               {" "}
               <p className={`${messageDeet.sent ? "hidden" : "inline"}`}>
-                {messageDeet.messengerId}
+                {/* {messageDeet.messengerId} */}
+                {messageDeet.name}
               </p>
               <h2
-                className={`font-bold ${
-                  messageDeet.sent ? "text-red-800" : "text-blue-500"
-                }`}
+                className={`font-bold ${messageDeet.sent ? "text-red-800" : "text-blue-500"
+                  }`}
               >
                 {messageDeet.message}
               </h2>
@@ -179,7 +222,7 @@ function App() {
       </div>
       <div
         id="FooterSendElement"
-        className="w-screen px-8 border-y-blue-900 border-4  bg-white border-blue-100 py-4 flex justify-between"
+        className="w-full px-8 border-y-blue-900 border-4  bg-white border-blue-100 py-4 flex justify-between h-[15vh]"
       >
         <input
           className="w-full px-3 border-none outline-none"
