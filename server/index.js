@@ -9,6 +9,7 @@ app.use(cors());
 
 
 const io = new Server(server, {
+  connectionStateRecovery: {},
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
@@ -22,6 +23,8 @@ io.on("connection", (socket) => {
   socket.on("join_room", ({room, name}) => {
     // console.log(`${socket.id} joined room no. ${room}`);
     socket.join(room);
+    socket.name = name
+    socket.room = room
     socket.to(room).emit('newJoinee', {
       name,
       id: socket.id
@@ -50,9 +53,29 @@ io.on("connection", (socket) => {
       io.to(room).emit('disconnectJoinee', disconnectObj)
   })
 
+  socket.on('disconnect', () => {
+    // Handle disconnection similar to 'wannaDisconnect' logic
+    let room = socket.room
+    let tempArr = participantList.filter(participant => participant.id !== socket.id);
+    let disconnectObj = {
+      participantList: tempArr,
+      id: socket.id,
+      name: socket.name // Assuming you have stored the name in the socket object
+    };
+    
+    // Broadcast the disconnection event to all clients in the room
+    socket.leave(room);
+    io.to(room).emit('disconnectJoinee', disconnectObj);
+
+    // Update the participant list after disconnection
+    participantList = tempArr;
+
+    // Notify clients about the updated participant list after disconnection
+    io.to(room).emit('participantList', participantList);
+  });
+
   socket.on("send_message", (messageDetails) => {
     const {room, messageDeet} = messageDetails
-    // console.log(messageDetails)
     socket.to(messageDetails.room).emit("receive_message", messageDetails);
   });
 });
