@@ -46,7 +46,7 @@ io.on("connection", (socket) => {
         id: socket.id,
         name
       }
-      socket.disconnect();
+      socket.leave(room);
       io.to(room).emit('disconnectJoinee', disconnectObj)
   })
 

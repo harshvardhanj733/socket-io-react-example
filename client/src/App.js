@@ -116,9 +116,6 @@ function App() {
       alert(`User Disconnected: ${disconnectObj.name} ~ ${disconnectObj.id.substring(0, 3)}`);
       setParticipants(disconnectObj.participantList);
     })
-
-    socket.on('disconnect');
-
   }, [socket]);
 
   const handleEnter = (e) => {
