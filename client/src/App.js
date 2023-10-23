@@ -170,9 +170,11 @@ function App() {
         setMessage={setMessage}
         middleMessageContainerRef={middleMessageContainerRef}
       />{" "}
-      <div className="h-screen w-full md:w-2/3 bg-rose-100">
+      <div className="h-screen w-full md:w-2/3 ">
         {" "}
-        <Canvas />
+        <div>
+          <Canvas />
+        </div>
         <div className="h-1/2 bg-teal-200"> Video Grids</div>
       </div>
     </div>
