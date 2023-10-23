@@ -1,11 +1,10 @@
 import "./App.css";
 import io from "socket.io-client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const socket = io.connect("http://localhost:3001");
 
 function App() {
-
   //All Users State In a Room
   const [participants, setParticipants] = useState([]);
 
@@ -20,19 +19,25 @@ function App() {
 
   // Messenger State
   const [myId, setMyId] = useState("");
+  const middleMessageContainerRef = useRef();
 
   const joinRoom = () => {
     if (room !== "" && name != "") {
       socket.emit("join_room", { room, name });
-      alert(`Your Name is: ${name} ~ ${myId.substring(0, 3)} and You have joined room ${room}`);
+      alert(
+        `Your Name is: ${name} ~ ${myId.substring(
+          0,
+          3
+        )} and You have joined room ${room}`
+      );
     }
   };
 
   const handleDeletion = () => {
-    console.log("Delete Button Clicked")
-    socket.emit('wannaDisconnect', { room, name })
+    console.log("Delete Button Clicked");
+    socket.emit("wannaDisconnect", { room, name });
     window.location.reload();
-  }
+  };
 
   const sendMessage = () => {
     const date = new Date();
@@ -71,7 +76,7 @@ function App() {
     setMessage("");
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const handleBeforeUnload = () => {
       // Call handleDeletion when the page is about to unload (reload, close, etc.)
       handleDeletion();
@@ -108,16 +113,29 @@ function App() {
       alert(`New User Joined: ${name} ~ ${id.substring(0, 3)}`);
     });
 
-    socket.on('participantList', (participantList) => {
+    socket.on("participantList", (participantList) => {
       setParticipants(participantList);
-    })
+    });
 
-    socket.on('disconnectJoinee', (disconnectObj) => {
-      alert(`User Disconnected: ${disconnectObj.name} ~ ${disconnectObj.id.substring(0, 3)}`);
+    socket.on("disconnectJoinee", (disconnectObj) => {
+      alert(
+        `User Disconnected: ${
+          disconnectObj.name
+        } ~ ${disconnectObj.id.substring(0, 3)}`
+      );
       setParticipants(disconnectObj.participantList);
-    })
+    });
   }, [socket]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
+  const scrollToBottom = () => {
+    const container = middleMessageContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  };
   const handleEnter = (e) => {
     if (e.key === "Enter") {
       sendMessage(e);
@@ -131,7 +149,7 @@ function App() {
   };
 
   return (
-    <div className="flex w-screen">
+    <div className="flex w-screen flex-col md:flex-row">
       <div className="flex flex-col overflow-x-hidden justify-start w-screen lg:w-1/3 items-center h-screen">
         <div
           id="HeadRoomElement"
@@ -178,7 +196,7 @@ function App() {
           </button>
         </div>
 
-        <div className="w-full overflow-x-scroll bg-blue-500 h-[8vh] text-white flex">
+        <div className="w-full overflow-x-auto bg-blue-500 h-[8vh] text-white flex">
           {participants.map((participant) => {
             return (
               <p>
@@ -189,7 +207,9 @@ function App() {
         </div>
 
         <div
-          className={`flex flex-col text-gray-500 justify-start w-full h-[67vh] overflow-y-scroll bg-cyan-50`}
+          ref={middleMessageContainerRef}
+          id="MiddleMessageContainer"
+          className={`flex flex-col text-gray-500 justify-start w-full h-[67vh] overflow-x-auto overflow-y-scroll bg-cyan-50`}
         >
           {" "}
           {/* {participants.map((participant)=>(
@@ -221,7 +241,7 @@ function App() {
         </div>
         <div
           id="FooterSendElement"
-          className="w-full px-8 border-y-blue-900 border-4  bg-white border-blue-100 py-4 flex justify-between h-[15vh]"
+          className="w-full px-8 border-blue-900 border-4 items-center  bg-white py-4 flex justify-between h-[15vh]"
         >
           <input
             className="w-full px-3 border-none outline-none"
@@ -232,7 +252,7 @@ function App() {
             onKeyDown={handleEnter}
           />
           <button
-            className="bg-yellow-100 hover:bg-yellow-400 pl-2 w-24 rounded-md py-3 flex"
+            className="bg-yellow-100 hover:bg-yellow-400 pl-2 w-24 h-12 py-2 rounded-md md:py-3 flex"
             onClick={sendMessage}
           >
             {" "}
@@ -240,7 +260,7 @@ function App() {
           </button>
         </div>
       </div>
-      <div className="h-screen flax flax-cols w-2/3 bg-rose-100">
+      <div className="h-screen flax flax-cols w-full md:w-2/3 bg-rose-100">
         <div className="h-1/2 bg-red-200"> Drawing Space</div>
         <div className="h-1/2 bg-teal-200"> Video Grids</div>
       </div>
