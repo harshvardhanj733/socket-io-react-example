@@ -178,7 +178,7 @@ function App() {
           <Canvas />
           {/* <Board /> */}
         </div>
-        <div className="h-1/2 bg-teal-100">
+        <div className="h-1/2 bg-gradient-to-r from-purple-400 to-purple-900">
           {" "}
           <VideoApp />
         </div>

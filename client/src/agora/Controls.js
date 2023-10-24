@@ -6,6 +6,13 @@ import { useClient } from "./Settings";
 // import VideocamIcon from "@material-ui/icons/Videocam";
 // import VideocamOffIcon from "@material-ui/icons/VideocamOff";
 // import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import {
+  FaMicrophoneAlt,
+  FaMicrophoneAltSlash,
+  FaPhoneSlash,
+  FaVideo,
+  FaVideoSlash,
+} from "react-icons/fa";
 
 export default function Controls(props) {
   const client = useClient();
@@ -36,25 +43,22 @@ export default function Controls(props) {
   };
 
   return (
-    <div className="flex">
+    <div className="flex justify-between w-50vw px-12 pt-4 text-3xl text-white ">
+      <button
+        className=" hover:text-gray-200"
+        // className={`bg-{trackState.audio ? "blue" : "red"}-400`}
+        onClick={() => mute("audio")}
+      >
+        {trackState.audio ? <FaMicrophoneAlt /> : <FaMicrophoneAltSlash />}
+      </button>
+      {/* bg-{trackState.audio ? "blue" : "red"}-400 */}
+      <button className=" hover:text-gray-200" onClick={() => mute("video")}>
+        {trackState.video ? <FaVideo /> : <FaVideoSlash />}
+      </button>
       <div>
-        <button
-          className={`bg-{trackState.audio ? "blue" : "red"}-400`}
-          onClick={() => mute("audio")}
-        >
-          {trackState.audio ? "micOn" : "micOff"}
+        <button onClick={() => leaveChannel()} className="hover:text-red-400">
+          <FaPhoneSlash />
         </button>
-      </div>
-      <div className="flex">
-        <button
-          className={`bg-{trackState.audio ? "blue" : "red"}-400`}
-          onClick={() => mute("video")}
-        >
-          {trackState.video ? "videoOn" : "videoOff"}
-        </button>
-      </div>
-      <div className="flex">
-        <button onClick={() => leaveChannel()}>Leave</button>
       </div>
     </div>
   );
