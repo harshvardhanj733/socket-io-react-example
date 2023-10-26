@@ -3,6 +3,8 @@ import io from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
 import Messaging from "./components/Messaging";
 import Canvas from "./components/Canvas";
+import Board from "./components/Board";
+import VideoApp from "./agora/VideoApp";
 
 const socket = io.connect("http://localhost:3001");
 
@@ -172,10 +174,14 @@ function App() {
       />{" "}
       <div className="h-screen w-full md:w-2/3 ">
         {" "}
-        <div>
+        <div className="h-1/2 w-full ">
           <Canvas />
+          {/* <Board /> */}
         </div>
-        <div className="h-1/2 bg-teal-200"> Video Grids</div>
+        <div className="h-1/2 bg-gradient-to-r from-purple-400 to-purple-900">
+          {" "}
+          <VideoApp />
+        </div>
       </div>
     </div>
   );
