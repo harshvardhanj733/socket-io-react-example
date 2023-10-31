@@ -12,11 +12,11 @@ function VideoApp() {
       {inCall ? (
         <VideoCall setInCall={setInCall} />
       ) : (
-        <div className="w-full h-full ">
+        <div className="w-24 h-full ">
           {" "}
           <button
             onClick={() => setInCall(true)}
-            className="px-16 my-20 w-max mx-52 py-8 rounded-lg border-4 border-white text-6xl text-white hover:bg-white hover:text-purple-500"
+            className="px-16 my-20 w-max mx-52 py-8 rounded-lg hover:border-4 hover:border-white text-6xl hover:text-white bg-white text-purple-500 hover:bg-transparent"
           >
             Join Video
           </button>

@@ -77,7 +77,7 @@ function Messaging({
           {participants.map((participant) => {
             return (
               <p>
-                {participant.name}~{participant.id.substring(0, 2)},&nbsp;
+                {participant.name}~{participant.id.substring(0, 3)},&nbsp;
               </p>
             );
           })}
@@ -86,7 +86,7 @@ function Messaging({
         <div
           ref={middleMessageContainerRef}
           id="MiddleMessageContainer"
-          className={`flex flex-col text-gray-500 justify-start w-full h-[72vh] overflow-x-auto overflow-y-scroll bg-purple-50`}
+          className={`flex flex-col text-gray-500 justify-start w-full h-[72vh] overflow-x-auto overflow-y-scroll bg-white`}
         >
           {" "}
           {/* {participants.map((participant)=>(
@@ -118,10 +118,10 @@ function Messaging({
         </div>
         <div
           id="FooterSendElement"
-          className="w-full px-1  border-2 items-center  bg-white py-4 flex justify-between h-[10vh]"
+          className="w-full px-1  border-2 items-center  bg-purple-50 py-4 flex justify-between h-[10vh]"
         >
           <input
-            className="w-full px-3 border-none outline-none"
+            className="w-full px-3 border-none outline-none bg-purple-50"
             placeholder="Message..."
             onChange={(a) => {
               setMessage(a.target.value);

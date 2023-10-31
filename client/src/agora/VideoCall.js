@@ -50,10 +50,14 @@ export default function VideoCall(props) {
       try {
         await client.join(config.appId, name, config.token, null);
       } catch (error) {
-        console.log("error");
+        console.log(config.appId);
+
+        console.log("error" + error);
       }
 
-      if (tracks) await client.publish([tracks[0], tracks[1]]);
+      if (tracks) {
+        await client.publish([tracks[0], tracks[1]]);
+      }
       setStart(true);
     };
 
