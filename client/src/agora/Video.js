@@ -12,7 +12,7 @@ export default function Video(props) {
 
   return (
     <div
-      className="h-full w-full flex gap-2 py-12 pl-4"
+      className="h-full w-full flex gap-2 py-12 px-4"
       // style={{ height: "100%", width: "50vw" }}
       // className="grid-flow-row grid-cols-"
     >
